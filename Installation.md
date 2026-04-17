@@ -19,7 +19,7 @@ Before you begin, make sure you have the following:
   👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/download/mod-win/TEST_V4-MODDED-TWRP-WINDOWS-17-04.img) 
 
 - 🪟 Windows ESD Image  
-  👉 (Windows-Image)(https://arkt-7.github.io/woawin/)  
+  👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
 
 - 📦 WinInstaller ZIP  
   👉 [Nabu-WinInstaller.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller) 

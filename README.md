@@ -49,8 +49,8 @@ installer_ubuntu/
 | `Linux-Installer` | Linx Installer script | [Kumar-Jy](https://github.com/Kumar-Jy) |
 | `image/linux.img` | Ubuntu root filesystem image | [Canonical](https://github.com/canorical) & [TheMojoMan](https://github.com/TheMojoMan) |
 | `efi/` | EFI boot files and boot configuration | [Timofey](https://github.com/timoxa0) & [TheMojoMan](https://github.com/TheMojoMan) |
-| `DBKP/` | DualBoot kernel patcher and UEFI payload | [rodriguest](https://github.com/rodriguezst), [remtrik]([TheMojoMan](https://github.com/remtrik), [map220v](https://github.com/map220v), [project Aloha](https://github.com/Project-Aloha) |
-| `bin/` | Helper binaries for flashing | [TheMojoMan](https://github.com/TheMojoMan) |
+| `DBKP/` | DualBoot kernel patcher and UEFI payload | [rodriguest](https://github.com/rodriguezst), [remtrik](https://github.com/remtrik), [map220v](https://github.com/map220v), [project Aloha](https://github.com/Project-Aloha) |
+| `bin/` | Helper binaries for flashing | [7z](https://www.7-zip.org/) |
 
 
 
