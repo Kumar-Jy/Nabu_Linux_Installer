@@ -1,7 +1,8 @@
 # Linux Installer Zip for Xiaomi Pad 5 (NABU)
 ---
 ### Installation Instruction
-- 📱 [Multi-OS Installation Guide (Android + Windows + Linux)](Installation.md)
+- #### 📱 Multi-OS Installation Guide
+  - 👉 [Android + Windows + Linux](Installation.md)
 
 ---
 ## Create the release ZIP archive
