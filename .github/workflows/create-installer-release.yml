@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install extractors
         run: |
@@ -29,7 +29,6 @@ jobs:
         id: names
         run: |
           FILENAME=$(basename "${{ github.event.inputs.img_link }}" | sed 's/?.*//')
-          # Remove ALL common extensions
           CLEAN_NAME=$(echo "$FILENAME" | sed 's/\.img$//' | sed 's/\.xz$//' | sed 's/\.zst$//' | sed 's/\.gz$//' | sed 's/\.bz2$//' | sed 's/\.tar$//' | sed 's/\.7z$//' | sed 's/\.zip$//' | sed 's/\.raw$//')
           echo "zip_name=Nabu_${CLEAN_NAME}_Installer.zip" >> $GITHUB_OUTPUT
           echo "release_name=${CLEAN_NAME}-Installer" >> $GITHUB_OUTPUT
@@ -39,105 +38,63 @@ jobs:
           mkdir -p image
           wget -O linux.file "${{ github.event.inputs.img_link }}"
           
-          # Try extraction based on file extension
           case "${{ github.event.inputs.img_link }}" in
-            *.zst)
-              echo "Extracting ZST file..."
-              zstd -d linux.file -o linux.img
-              ;;
-            *.xz)
-              echo "Extracting XZ file..."
-              xz -d linux.file
-              mv linux.file linux.img 2>/dev/null || mv linux.file.linux.img linux.img 2>/dev/null || true
-              ;;
-            *.gz)
-              echo "Extracting GZ file..."
-              gunzip -c linux.file > linux.img
-              ;;
-            *.bz2)
-              echo "Extracting BZ2 file..."
-              bunzip2 -c linux.file > linux.img
-              ;;
-            *.tar)
-              echo "Extracting TAR file..."
-              tar -xf linux.file
-              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
-              ;;
-            *.zip)
-              echo "Extracting ZIP file..."
-              unzip -q linux.file
-              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
-              ;;
-            *.7z)
-              echo "Extracting 7Z file..."
-              7z x linux.file -y
-              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
-              ;;
-            *)
-              echo "Raw file, using as-is"
-              cp linux.file linux.img
-              ;;
+            *.zst) zstd -d linux.file -o linux.img ;;
+            *.xz) xz -d linux.file && mv linux.file linux.img 2>/dev/null || mv linux.file.linux.img linux.img ;;
+            *.gz) gunzip -c linux.file > linux.img ;;
+            *.bz2) bunzip2 -c linux.file > linux.img ;;
+            *.tar) tar -xf linux.file && find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \; ;;
+            *.zip) unzip -q linux.file && find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \; ;;
+            *.7z) 7z x linux.file -y && find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \; ;;
+            *) cp linux.file linux.img ;;
           esac
           
-          # Verify and copy
           if [ -f linux.img ]; then
             cp linux.img image/linux.img
-            echo "Successfully extracted Linux image"
+            echo "✓ Linux image extracted"
           else
-            echo "Failed to extract Linux image"
+            echo "✗ Failed to extract Linux image"
             exit 1
           fi
       
-      - name: Extract EFI files
+      - name: Extract EFI files (exclude Android/Boot case-insensitive)
         run: |
           mkdir -p efi/linux
           wget -O efi.file "${{ github.event.inputs.efi_link }}"
           
-          # Try extraction based on file extension
-          case "${{ github.event.inputs.efi_link }}" in
-            *.zip)
-              echo "Extracting ZIP file..."
-              unzip -q efi.file -d efi_extract/
-              ;;
-            *.7z)
-              echo "Extracting 7Z file..."
-              7z x efi.file -oefi_extract -y
-              ;;
-            *.tar|*.tar.gz|*.tar.xz|*.tar.bz2)
-              echo "Extracting TAR file..."
-              tar -xf efi.file -C efi_extract/ 2>/dev/null || tar -xf efi.file
-              ;;
-            *.gz)
-              echo "Extracting GZ file..."
-              gunzip -c efi.file > efi_extract/boot.efi
-              ;;
-            *.efi)
-              echo "Raw EFI file"
-              cp efi.file efi/linux/boot.efi
-              ;;
-            *)
-              echo "Unknown format, trying to find .efi files"
-              cp efi.file efi_extract/ 2>/dev/null || true
-              ;;
-          esac
+          # Extract everything
+          unzip -q efi.file -d efi_full/
           
-          # Find and copy .efi files
-          if [ -d "efi_extract" ]; then
-            find efi_extract -name "*.efi" -exec cp {} efi/linux/ \;
-          fi
+          # Remove Android and Boot directories (case-insensitive)
+          echo "Removing Android and Boot directories (any case)..."
+          find efi_full -type d -iname "android" -exec rm -rf {} + 2>/dev/null || true
+          find efi_full -type d -iname "boot" -exec rm -rf {} + 2>/dev/null || true
           
-          # Verify
-          if [ -f efi/linux/*.efi ]; then
-            echo "Successfully extracted EFI files"
+          # Find and copy ALL .efi files from remaining structure (case-insensitive for extension too)
+          EFI_FILES=$(find efi_full -type f -iname "*.efi")
+          EFI_COUNT=$(echo "$EFI_FILES" | grep -c "\.efi" || echo 0)
+          
+          if [ $EFI_COUNT -gt 0 ]; then
+            echo "$EFI_COUNT EFI file(s) found:"
+            echo "$EFI_FILES" | while read -r file; do
+              if [ -n "$file" ]; then
+                cp "$file" efi/linux/
+                echo "  ✓ Copied: $(basename "$file")"
+              fi
+            done
+            echo "✓ All $EFI_COUNT EFI files copied to efi/linux/"
+            ls -lh efi/linux/
           else
-            echo "Failed to extract EFI files"
+            echo "✗ No .efi files found"
+            echo "Full directory structure for debugging:"
+            find efi_full -type d | head -20
             exit 1
           fi
       
       - name: Create installer ZIP
         run: |
           7z a -tzip "${{ steps.names.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
-          echo "Created: ${{ steps.names.outputs.zip_name }}"
+          echo "✓ Created: ${{ steps.names.outputs.zip_name }}"
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
