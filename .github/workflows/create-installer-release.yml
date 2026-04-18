@@ -13,6 +13,9 @@ on:
         description: 'Release tag (e.g., v1.0.0)'
         required: true
 
+permissions:
+  contents: write
+  
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -95,18 +98,26 @@ jobs:
         run: |
           7z a -tzip "${{ steps.names.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
           echo "✓ Created: ${{ steps.names.outputs.zip_name }}"
-      
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.release_name }}
+          path: |
+            bin
+            DBKP
+            efi
+            image
+            META-INF
+            README.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag }}
           name: ${{ steps.names.outputs.release_name }}
           files: ${{ steps.names.outputs.zip_name }}
+          draft: false
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Linux-Installer
-          path: ${{ steps.names.outputs.zip_name }}
