@@ -20,40 +20,124 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install extractor
-        run: sudo apt-get update && sudo apt-get install -y unar p7zip-full
+      - name: Install extractors
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full zstd xz-utils unzip tar gzip bzip2
       
       - name: Generate file names
         id: names
         run: |
-          # Get clean name from image link
           FILENAME=$(basename "${{ github.event.inputs.img_link }}" | sed 's/?.*//')
-          CLEAN_NAME=$(echo "$FILENAME" | sed 's/\.img$//' | sed 's/\.xz$//' | sed 's/\.zst$//' | sed 's/\.gz$//' | sed 's/\.bz2$//' | sed 's/\.tar$//' | sed 's/\.7z$//' | sed 's/\.zip$//')
-          
-          # Set ZIP name with prefix
+          # Remove ALL common extensions
+          CLEAN_NAME=$(echo "$FILENAME" | sed 's/\.img$//' | sed 's/\.xz$//' | sed 's/\.zst$//' | sed 's/\.gz$//' | sed 's/\.bz2$//' | sed 's/\.tar$//' | sed 's/\.7z$//' | sed 's/\.zip$//' | sed 's/\.raw$//')
           echo "zip_name=Nabu_${CLEAN_NAME}_Installer.zip" >> $GITHUB_OUTPUT
           echo "release_name=${CLEAN_NAME}-Installer" >> $GITHUB_OUTPUT
       
-      - name: Download and extract
+      - name: Extract Linux image
         run: |
-          mkdir -p image efi/linux
+          mkdir -p image
+          wget -O linux.file "${{ github.event.inputs.img_link }}"
           
-          # Extract Linux image
-          wget -q -O linux.file "${{ github.event.inputs.img_link }}"
-          unar -q -o linux_extract linux.file
-          cp linux_extract/*.img image/linux.img 2>/dev/null || find linux_extract -name "*.img" -exec cp {} image/linux.img \;
+          # Try extraction based on file extension
+          case "${{ github.event.inputs.img_link }}" in
+            *.zst)
+              echo "Extracting ZST file..."
+              zstd -d linux.file -o linux.img
+              ;;
+            *.xz)
+              echo "Extracting XZ file..."
+              xz -d linux.file
+              mv linux.file linux.img 2>/dev/null || mv linux.file.linux.img linux.img 2>/dev/null || true
+              ;;
+            *.gz)
+              echo "Extracting GZ file..."
+              gunzip -c linux.file > linux.img
+              ;;
+            *.bz2)
+              echo "Extracting BZ2 file..."
+              bunzip2 -c linux.file > linux.img
+              ;;
+            *.tar)
+              echo "Extracting TAR file..."
+              tar -xf linux.file
+              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
+              ;;
+            *.zip)
+              echo "Extracting ZIP file..."
+              unzip -q linux.file
+              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
+              ;;
+            *.7z)
+              echo "Extracting 7Z file..."
+              7z x linux.file -y
+              find . -maxdepth 1 -name "*.img" -exec mv {} linux.img \;
+              ;;
+            *)
+              echo "Raw file, using as-is"
+              cp linux.file linux.img
+              ;;
+          esac
           
-          # Extract EFI file  
-          wget -q -O efi.file "${{ github.event.inputs.efi_link }}"
-          unar -q -o efi_extract efi.file
-          cp efi_extract/*.efi efi/linux/ 2>/dev/null || find efi_extract -name "*.efi" -exec cp {} efi/linux/ \;
+          # Verify and copy
+          if [ -f linux.img ]; then
+            cp linux.img image/linux.img
+            echo "Successfully extracted Linux image"
+          else
+            echo "Failed to extract Linux image"
+            exit 1
+          fi
+      
+      - name: Extract EFI files
+        run: |
+          mkdir -p efi/linux
+          wget -O efi.file "${{ github.event.inputs.efi_link }}"
           
-          # Verify extraction
-          test -f image/linux.img || { echo "Failed to extract Linux image"; exit 1; }
-          test -f efi/linux/*.efi || { echo "Failed to extract EFI file"; exit 1; }
+          # Try extraction based on file extension
+          case "${{ github.event.inputs.efi_link }}" in
+            *.zip)
+              echo "Extracting ZIP file..."
+              unzip -q efi.file -d efi_extract/
+              ;;
+            *.7z)
+              echo "Extracting 7Z file..."
+              7z x efi.file -oefi_extract -y
+              ;;
+            *.tar|*.tar.gz|*.tar.xz|*.tar.bz2)
+              echo "Extracting TAR file..."
+              tar -xf efi.file -C efi_extract/ 2>/dev/null || tar -xf efi.file
+              ;;
+            *.gz)
+              echo "Extracting GZ file..."
+              gunzip -c efi.file > efi_extract/boot.efi
+              ;;
+            *.efi)
+              echo "Raw EFI file"
+              cp efi.file efi/linux/boot.efi
+              ;;
+            *)
+              echo "Unknown format, trying to find .efi files"
+              cp efi.file efi_extract/ 2>/dev/null || true
+              ;;
+          esac
           
-          # Create ZIP with dynamic name
+          # Find and copy .efi files
+          if [ -d "efi_extract" ]; then
+            find efi_extract -name "*.efi" -exec cp {} efi/linux/ \;
+          fi
+          
+          # Verify
+          if [ -f efi/linux/*.efi ]; then
+            echo "Successfully extracted EFI files"
+          else
+            echo "Failed to extract EFI files"
+            exit 1
+          fi
+      
+      - name: Create installer ZIP
+        run: |
           7z a -tzip "${{ steps.names.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
+          echo "Created: ${{ steps.names.outputs.zip_name }}"
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
