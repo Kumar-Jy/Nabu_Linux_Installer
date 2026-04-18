@@ -34,10 +34,10 @@ installer_ubuntu/
 
 ### Create the ZIP
 
-- Repack all files/folders into a zip file. This will create your
+- Repack all files/folders into a zip file. This will create your installer.
 
 ### Create the ZIP using 7-Zip
-- sellect all folders and pack it as zip file.
+- Select all folders and pack it as a zip file.
 
 ### Notes
 - The ZIP should preserve the directory layout exactly as shown above.
@@ -51,6 +51,3 @@ installer_ubuntu/
 | `efi/` | EFI boot files and boot configuration | [Timofey](https://github.com/timoxa0) & [TheMojoMan](https://github.com/TheMojoMan) |
 | `DBKP/` | DualBoot kernel patcher and UEFI payload | [rodriguest](https://github.com/rodriguezst), [remtrik](https://github.com/remtrik), [map220v](https://github.com/map220v), [project Aloha](https://github.com/Project-Aloha) |
 | `bin/` | Helper binaries for flashing | [7z](https://www.7-zip.org/) |
-
-
-

@@ -1,0 +1,141 @@
+name: Create Installer Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      img_link:
+        description: 'Download link for Linux image'
+        required: true
+      efi_link:
+        description: 'Download link for EFI file'
+        required: true
+      release_tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+  
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Install extractors
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full zstd
+      
+      - name: Generate file names
+        id: names
+        run: |
+          TAG="${{ github.event.inputs.release_tag }}"
+          echo "zip_name=Nabu-Linux-Installer-${TAG}.zip" >> $GITHUB_OUTPUT
+          echo "release_name=Nabu-Linux-Installer-${TAG}" >> $GITHUB_OUTPUT
+      
+      - name: Download and Extract Linux Image
+        run: |
+          mkdir -p image ext_img
+          wget -qO linux.dl "${{ github.event.inputs.img_link }}"
+          
+          echo "Extracting Linux Image..."
+          # Check if it's a structural archive (zip, 7z, tar)
+          if 7z l linux.dl >/dev/null 2>&1; then
+            7z x linux.dl -oext_img -y
+            # Handle tar inside gz/xz that 7z might have extracted
+            find ext_img -name "*.tar" -exec tar -xf {} -C ext_img \; -exec rm {} \;
+          else
+            # Check if it's a direct compression stream
+            FILE_TYPE=$(file -b linux.dl)
+            if echo "$FILE_TYPE" | grep -qi "XZ compressed"; then xz -d -c linux.dl > ext_img/linux.img
+            elif echo "$FILE_TYPE" | grep -qi "gzip compressed"; then gunzip -c linux.dl > ext_img/linux.img
+            elif echo "$FILE_TYPE" | grep -qi "bzip2 compressed"; then bunzip2 -c linux.dl > ext_img/linux.img
+            elif echo "$FILE_TYPE" | grep -qi "Zstandard compressed"; then zstd -d linux.dl -o ext_img/linux.img
+            else cp linux.dl ext_img/linux.img
+            fi
+          fi
+          
+          # Prefer an explicit .img file, fallback to the largest file extracted
+          IMG_FILE=$(find ext_img -type f -name "*.img" | head -n 1)
+          [ -z "$IMG_FILE" ] && IMG_FILE=$(find ext_img -type f -printf "%s %p\n" | sort -n | tail -1 | cut -d' ' -f2-)
+          
+          if [ -n "$IMG_FILE" ]; then
+            mv "$IMG_FILE" image/linux.img
+            echo "Prepared image/linux.img successfully."
+          else
+            echo "Error: Could not find or extract Linux image."
+            exit 1
+          fi
+      
+      - name: Download and Extract EFI File
+        run: |
+          mkdir -p efi/linux ext_efi
+          wget -qO efi.dl "${{ github.event.inputs.efi_link }}"
+          
+          echo "Extracting EFI File(s)..."
+          if 7z l efi.dl >/dev/null 2>&1; then
+            7z x efi.dl -oext_efi -y
+            find ext_efi -name "*.tar" -exec tar -xf {} -C ext_efi \; -exec rm {} \;
+          else
+            FILE_TYPE=$(file -b efi.dl)
+            if echo "$FILE_TYPE" | grep -qi "XZ compressed"; then xz -d -c efi.dl > ext_efi/boot.efi
+            elif echo "$FILE_TYPE" | grep -qi "gzip compressed"; then gunzip -c efi.dl > ext_efi/boot.efi
+            elif echo "$FILE_TYPE" | grep -qi "bzip2 compressed"; then bunzip2 -c efi.dl > ext_efi/boot.efi
+            elif echo "$FILE_TYPE" | grep -qi "Zstandard compressed"; then zstd -d efi.dl -o ext_efi/boot.efi
+            else cp efi.dl ext_efi/boot.efi
+            fi
+          fi
+          
+          echo "Cleaning up irrelevant paths..."
+          find ext_efi -type d -iname "android" -exec rm -rf {} + 2>/dev/null || true
+          find ext_efi -type d -iname "boot" -exec rm -rf {} + 2>/dev/null || true
+          
+          EFI_FILES=$(find ext_efi -type f -iname "*.efi")
+          if [ -n "$EFI_FILES" ]; then
+            echo "Valid EFI file(s) found. Cleaning old EFI files..."
+            rm -rf efi/linux/*
+            echo "$EFI_FILES" | while read -r file; do
+              cp "$file" efi/linux/
+              echo "Copied: $(basename "$file")"
+            done
+          else
+            echo "No .efi files found natively. Trying fallback to largest file..."
+            LARGEST=$(find ext_efi -type f -printf "%s %p\n" | sort -n | tail -1 | cut -d' ' -f2-)
+            if [ -n "$LARGEST" ]; then
+              echo "Fallback payload found. Cleaning old EFI files..."
+              rm -rf efi/linux/*
+              cp "$LARGEST" efi/linux/boot.efi
+              echo "Copied raw payload as boot.efi"
+            else
+              echo "Error: Could not extract EFI payload."
+              exit 1
+            fi
+          fi
+      
+      - name: Create installer ZIP
+        run: |
+          7z a -tzip "${{ steps.names.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
+          echo "Created: ${{ steps.names.outputs.zip_name }}"
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.release_name }}
+          path: |
+            bin
+            DBKP
+            efi
+            image
+            META-INF
+            README.md
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          name: ${{ steps.names.outputs.release_name }}
+          files: ${{ steps.names.outputs.zip_name }}
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

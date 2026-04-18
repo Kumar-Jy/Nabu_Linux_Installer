@@ -25,7 +25,7 @@ Before you begin, make sure you have the following:
   👉 [Nabu-WinInstaller.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller) 
 
 - 🐧 Linux Installer ZIP  
-  👉 (Nabu-Linux-Installer.zip)[https://drive.google.com/file/d/1C0CX-avpkK0a8TSgN6Ji9W3TljwfFo4c/view?usp=sharing]  
+  👉 [Nabu-Linux-Installer.zip](https://drive.google.com/file/d/1C0CX-avpkK0a8TSgN6Ji9W3TljwfFo4c/view?usp=sharing)  
 
 - 🔁 SB/NSB Boot Switcher ZIP  
   👉 [SB/NSB-Boot-Switcher.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/download/Files/NABU_SB_NSB_boot_switcher_V260119.zip) 
@@ -38,7 +38,6 @@ Before you begin, make sure you have the following:
    ```bash
    fastboot boot modded-twrp.img
    ```
-
 2. In TWRP:
    - Go to **Advanced → Terminal**
    - Type:
@@ -49,7 +48,6 @@ Before you begin, make sure you have the following:
      - Windows
      - Linux  
      *(You can choose either one or both depending on your setup)*
-
 3. Once done:
    - Reboot to **System**
 
@@ -60,20 +58,15 @@ Before you begin, make sure you have the following:
 1. Download required files:
    - Windows `.esd` image  
    - `WinInstaller.zip`
-
 2. Reboot into **modded TWRP**
-
 3. Install Windows:
    - Go to **Install**
    - Select `WinInstaller.zip`
    - Swipe to flash
-
 4. Wait for installation to finish, then reboot
-
 5. First boot:
    - Wait for Windows setup to complete
    - Finish initial setup
-
 6. After setup:
    - Reboot back to **Android**
 
@@ -84,7 +77,6 @@ Before you begin, make sure you have the following:
 1. Download required files:
    - `Linux-Installer.zip`
    - `SB/NSB Boot Switcher.zip`
-
 2. Flash Boot Switcher:
    - Reboot into **modded TWRP**
    - Go to **Install**
@@ -92,23 +84,18 @@ Before you begin, make sure you have the following:
    - Swipe to flash
    - Reboot when done  
      *(This switches Windows to No Secure Boot, required for triple boot)*
-
 3. Return to Android, then:
    - Reboot again into **modded TWRP**
-
 4. Install Linux:
    - Select `Linux-Installer.zip`
    - Swipe to flash
-
 5. Once finished:
    - Reboot to system
-
 6. Boot Menu:
    - Device will boot into **UEFI menu**
    - Use:
      - **Volume Up/Down** → Navigate  
      - **Power Button** → Select OS
-
 7. Choose your desired OS and boot 🎉
 
 ---

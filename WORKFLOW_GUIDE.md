@@ -51,18 +51,14 @@ gh workflow run create-installer-release.yml \
 - **Description**: Download link for the Linux image file
 - **Format**: Full URL with protocol (http://, https://, ftp://, etc.)
 - **Examples**:
-  - `https://example.com/linux.img`
-  - `https://example.com/linux.img.gz`
   - `https://example.com/linux.img.7z`
-  - `https://example.com/linux.tar.bz2`
 
 ### efi_link (Required)
 - **Description**: Download link for the EFI file
 - **Format**: Full URL with protocol
 - **Examples**:
-  - `https://example.com/bootaa64.efi`
   - `https://example.com/efi_files.efi.xz`
-  - `https://example.com/efi_files.tar.zip
+  - `https://example.com/efi_files.tar.zip`
 
 ### release_tag (Required)
 - **Description**: Release version tag
