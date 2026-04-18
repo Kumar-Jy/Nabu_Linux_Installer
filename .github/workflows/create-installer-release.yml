@@ -1,0 +1,71 @@
+name: Create Installer Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      img_link:
+        description: 'Download link for Linux image'
+        required: true
+      efi_link:
+        description: 'Download link for EFI file'
+        required: true
+      release_tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install extractor
+        run: sudo apt-get update && sudo apt-get install -y unar p7zip-full
+      
+      - name: Generate file names
+        id: names
+        run: |
+          # Get clean name from image link
+          FILENAME=$(basename "${{ github.event.inputs.img_link }}" | sed 's/?.*//')
+          CLEAN_NAME=$(echo "$FILENAME" | sed 's/\.img$//' | sed 's/\.xz$//' | sed 's/\.zst$//' | sed 's/\.gz$//' | sed 's/\.bz2$//' | sed 's/\.tar$//' | sed 's/\.7z$//' | sed 's/\.zip$//')
+          
+          # Set ZIP name with prefix
+          echo "zip_name=Nabu_${CLEAN_NAME}_Installer.zip" >> $GITHUB_OUTPUT
+          echo "release_name=${CLEAN_NAME}-Installer" >> $GITHUB_OUTPUT
+      
+      - name: Download and extract
+        run: |
+          mkdir -p image efi/linux
+          
+          # Extract Linux image
+          wget -q -O linux.file "${{ github.event.inputs.img_link }}"
+          unar -q -o linux_extract linux.file
+          cp linux_extract/*.img image/linux.img 2>/dev/null || find linux_extract -name "*.img" -exec cp {} image/linux.img \;
+          
+          # Extract EFI file  
+          wget -q -O efi.file "${{ github.event.inputs.efi_link }}"
+          unar -q -o efi_extract efi.file
+          cp efi_extract/*.efi efi/linux/ 2>/dev/null || find efi_extract -name "*.efi" -exec cp {} efi/linux/ \;
+          
+          # Verify extraction
+          test -f image/linux.img || { echo "Failed to extract Linux image"; exit 1; }
+          test -f efi/linux/*.efi || { echo "Failed to extract EFI file"; exit 1; }
+          
+          # Create ZIP with dynamic name
+          7z a -tzip "${{ steps.names.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          name: ${{ steps.names.outputs.release_name }}
+          files: ${{ steps.names.outputs.zip_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-Installer
+          path: ${{ steps.names.outputs.zip_name }}
