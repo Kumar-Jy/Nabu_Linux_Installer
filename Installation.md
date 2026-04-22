@@ -21,14 +21,15 @@ Before you begin, make sure you have the following:
 - 🪟 Windows ESD Image  
   👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
 
-- 📦 WinInstaller ZIP  
-  👉 [Nabu-WinInstaller.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller) 
-
-- 🐧 Linux Installer ZIP  
-  👉 [Nabu-Linux-Installer.zip](https://drive.google.com/file/d/1C0CX-avpkK0a8TSgN6Ji9W3TljwfFo4c/view?usp=sharing)  
+- 📦 Win Installer ZIP  
+  👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
 
 - 🔁 SB/NSB Boot Switcher ZIP  
   👉 [SB/NSB-Boot-Switcher.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/download/Files/NABU_SB_NSB_boot_switcher_V260119.zip) 
+
+- 🐧 Linux Installer ZIP  
+  👉 [Nabu-Linux-Installer.zip](https://drive.google.com/drive/folders/1bupVQYnjuzJ8c6pXpyULnH1Cwska4P6-)  
+
 
 ---
 
@@ -49,7 +50,7 @@ Before you begin, make sure you have the following:
      - Linux  
      *(You can choose either one or both depending on your setup)*
 3. Once done:
-   - Reboot to **System**
+   - Reboot to **System** and setup Android
 
 ---
 
@@ -58,16 +59,15 @@ Before you begin, make sure you have the following:
 1. Download required files:
    - Windows `.esd` image  
    - `WinInstaller.zip`
+   *(Both should be in Xiaomi Pad 5 Download folder)*
 2. Reboot into **modded TWRP**
-3. Install Windows:
    - Go to **Install**
    - Select `WinInstaller.zip`
    - Swipe to flash
-4. Wait for installation to finish, then reboot
-5. First boot:
+   - Wait for installation to finish, then reboot to system
    - Wait for Windows setup to complete
    - Finish initial setup
-6. After setup:
+3. After setup:
    - Reboot back to **Android**
 
 ---
