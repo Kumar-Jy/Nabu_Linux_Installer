@@ -19,26 +19,19 @@ installer_ubuntu/
 ├─ bin/
 ├─ DBKP/
 ├─ efi/
+│  └─ android/
+│  └─ BOOT/
+│  └─ linux/
+│     └─ linux.efi
 ├─ image/
 │  └─ linux.img
 └─ META-INF/
 ```
 
-- `bin/`, `DBKP/`, and `efi/` are constant directories. Do not change or expand their internal contents in the archive.
-- The only file you should replace when updating the installer payload is `image/linux.img`.
-
-### Replace `image/linux.img`
-
-1. Put the new Linux image file at `installer_linux/image/linux.img`.
-2. Verify the file is present and is the correct build before creating the ZIP.
-3. Package the repository after replacing `linux.img`.
-
-### Create the ZIP
-
-- Repack all files/folders into a zip file. This will create your installer.
-
-### Create the ZIP using 7-Zip
-- Select all folders and pack it as a zip file.
+- `bin/`, and `DBKP/` are constant directories. Do not change or expand their internal contents in the archive.
+- Put the linux boot.efi into the `efi/linux/` directory.
+- Put the new Linux image file at `installer_linux/image/linux.img`.
+- Select all folders and pack it as a zip file using 7zip.
 
 ### Notes
 - The ZIP should preserve the directory layout exactly as shown above.

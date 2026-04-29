@@ -1,5 +1,5 @@
 #!/sbin/sh
-# Full-fledged linux installer for NABU by kumar_jy
+# Full-fledged Linux installer for NABU by kumar_jy
 OUTFD=/proc/self/fd/$2;
 ZIPFILE="$3";
 
@@ -19,19 +19,19 @@ $BOOTMODE || ps -A 2>/dev/null | grep zygote | grep -v grep >/dev/null && BOOTMO
 
 # /dev/tmp is safe for both booted and recovery installs
 tmp=/dev/tmp/linux-install;
-rm -rf $tmp;
-mkdir -p $tmp;
+rm -rf "$tmp";
+mkdir -p "$tmp";
 
 ui_print "#############################################";
-ui_print "#              Linux installer              #";
+ui_print "#             Linux installation            #";
 ui_print "#############################################";
 ui_print " ";
 linux_part=/dev/block/by-name/linux;
-zext=$tmp/bin/7zzs;
-mke2fs=$tmp/bin/mke2fs;
+zext="$tmp/bin/7zzs";
+mke2fs="$tmp/bin/mke2fs";
 
-unzip -o "$ZIPFILE" "bin/*" -d $tmp || abort "Failed to extract bin";
-chmod -R 0777 $tmp;
+unzip -o "$ZIPFILE" "bin/*" -d "$tmp" || abort "Failed to extract bin";
+chmod -R 0777 "$tmp";
 
 ui_print "Checking linux partition device: $linux_part";
 if [ ! -e "$linux_part" ]; then
@@ -42,7 +42,7 @@ if mount | grep -q " $linux_part "; then
   umount -lf "$linux_part" || abort "Failed to unmount linux partition $linux_part";
 fi;
 blockdev --setrw "$linux_part";
-ui_print "Formatting and flashing linux image";
+ui_print "Formatting and flashing Linux image";
 
 $mke2fs -t ext4 -F "$linux_part" || ui_print "failed to erase linux partition";
 
@@ -52,30 +52,37 @@ ui_print " ";
 ui_print "Done flashing linux!";
 
 ui_print "#############################################";
-ui_print "#             Boot Configration             #";
+ui_print "#            Boot Configuration             #";
 ui_print "#############################################";
 ui_print " ";
 esp_part=/dev/block/by-name/esp;
-mkdir -p $tmp/esp;
+mkdir -p "$tmp/esp";
 
-if mount | grep -q " $esp_part "; then
-  ui_print "ESP partition $esp_part already mounted, forcing unmount...";
-  umount -lf $esp_part || abort "Failed to unmount existing ESP partition";
+if mount | grep -q "/dev/block/by-name/esp"; then
+  ui_print "ESP partition is already mounted, forcing unmount...";
+  umount -lf "/dev/block/by-name/esp" || abort "Failed to unmount the existing ESP partition";
 fi
-mount "$esp_part" "$tmp/esp" || abort "Failed to mount ESP partition";
-mkdir -p $tmp/esp/efi;
-unzip -o "$ZIPFILE" "efi/*" -d $tmp/esp || abort "Failed to extract efi";
-umount -lf "$esp_part" 2>/dev/null
+mount "/dev/block/by-name/esp" "$tmp/esp" || abort "Failed to mount ESP partition";
+
+if ls "$tmp/esp/"[eE][fF][iI]/[mM][iI][cC][rR][oO][sS][oO][fF][tT]/Boot/SiPolicy.p7b >/dev/null 2>&1; then
+  abort "Found Secure Boot config, No-SB config is required for dual-boot.";
+fi;
+ 
+for i in "$tmp"/esp/[eE][fF][iI]/*; do
+  [ -e "$i" ] || continue; case ${i##*/} in [mM][iI][cC][rR][oO][sS][oO][fF][tT]) ;; *) rm -rf -- "$i";; esac
+done;
+mkdir -p "$tmp/esp/EFI";
+unzip -o "$ZIPFILE" "efi/*" -d "$tmp/esp" || abort "Failed to extract efi";
+umount -lf "/dev/block/by-name/esp" 2>/dev/null;
 
 ui_print " ";
-ui_print "Done setup boot configration !";
+ui_print "Boot configuration setup completed!";
 
 ui_print "#############################################";
-ui_print "#            DBPK UEFI installer            #";
+ui_print "#          DBKP UEFI installation           #";
 ui_print "#############################################";
 ui_print " ";
 
-# DBKP Flashable Linux Installer
 # modified from the TWRP A/B Installer Backend by osm0sis, Dees_Troy and topjohnwu
 # target partition without the slot suffix
 target=/dev/block/bootdevice/by-name/boot;
@@ -84,20 +91,20 @@ name=$(basename $target);
 
 ui_print "Unpacking the DBKP installer...";
 
-unzip -o "$ZIPFILE" "DBKP/*" -d $tmp || abort "Failed to extract DBKP!";
+unzip -o "$ZIPFILE" "DBKP/*" -d "$tmp" || abort "Failed to extract DBKP!";
 
-cd $tmp/DBKP;
+cd "$tmp/DBKP";
 uefipayload=`(ls *_EFI.fd) 2>/dev/null`;
 dbkpcfg=`(ls DualBoot.*.cfg) 2>/dev/null`;
 shellcode=`(ls ShellCode.*.bin) 2>/dev/null`;
 [ "$uefipayload" ] || abort "No UEFI payload found in zip!";
-[ "$dbkpcfg" ] || abort "No dbkp config found in zip!";
-[ "$shellcode" ] || abort "No dbkp shellcode found in zip!";
+[ "$dbkpcfg" ] || abort "No DBKP config found in zip!";
+[ "$shellcode" ] || abort "No DBKP shellcode found in zip!";
 
-tool=$tmp/DBKP/magiskboot;
-patcher=$tmp/DBKP/DualBootKernelPatcher;
-chmod 755 $tool;
-chmod 755 $patcher;
+tool="$tmp/DBKP/magiskboot";
+patcher="$tmp/DBKP/DualBootKernelPatcher";
+chmod 755 "$tool";
+chmod 755 "$patcher";
 
 backuppath="/sdcard/boot_backup"
 slot=$(getprop ro.boot.slot_suffix)
@@ -107,7 +114,7 @@ ui_print "Current slot: $slot."
 # if [ "$slot" ]; then
   if [ "$uefipayload" ]; then
     ui_print "Running image patcher on $name$slot...";
-    dd if=$target$slot of=boot.img || abort "Failed to dump image!";
+    dd if="$target$slot" of=boot.img || abort "Failed to dump image!";
 
     ui_print "Backing up original boot$slot.img..."
     rm -f "$backuppath$slot.img"
@@ -127,8 +134,8 @@ ui_print "Current slot: $slot."
 #   abort "Exiting...";
 # fi;
 
-blockdev --setrw $target$slot;
-cat new-boot.img /dev/zero > $target$slot 2>/dev/null || true;
+blockdev --setrw "$target$slot";
+cat new-boot.img /dev/zero > "$target$slot" 2>/dev/null || true;
 rm -f new-boot.img;
 
 if [ "$uefipayload" ]; then
@@ -137,4 +144,4 @@ if [ "$uefipayload" ]; then
 fi;
 
 ui_print " ";
-ui_print "Done flashing efi!";
+ui_print "Done flashing EFI!";

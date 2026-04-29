@@ -95,6 +95,7 @@ jobs:
           EFI_FILES=$(find ext_efi -type f -iname "*.efi")
           if [ -n "$EFI_FILES" ]; then
             echo "Valid EFI file(s) found. Cleaning old EFI files..."
+            mkdir -p efi/linux
             rm -rf efi/linux/*
             echo "$EFI_FILES" | while read -r file; do
               cp "$file" efi/linux/
