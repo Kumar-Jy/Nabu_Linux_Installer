@@ -49,15 +49,17 @@ jobs:
           
       - name: Download and extract rootfs image
         run: |
+          rm -rf image/* 2>/dev/null || true
           mkdir -p image
           wget -qO rootfs.dl "${{ github.event.inputs.img_link }}"
           
           if 7z x rootfs.dl -oextract_img -y >/dev/null 2>&1; then
-            IMG_FILE=$(find extract_img -type f -name "*.img" | head -1)
+            # Take any file extracted (should be the .img file)
+            IMG_FILE=$(find extract_img -type f -not -name "rootfs.dl" | head -1)
             if [ -n "$IMG_FILE" ]; then
               mv "$IMG_FILE" image/rootfs.img
             else
-              echo "No .img file found in archive"
+              echo "No files extracted"
               exit 1
             fi
           else
