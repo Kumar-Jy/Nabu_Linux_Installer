@@ -22,11 +22,17 @@ tmp=/dev/tmp/linux-install;
 rm -rf "$tmp";
 mkdir -p "$tmp";
 
+# set variables for the installation
+boot_part=/dev/block/bootdevice/by-name/boot;
+part=/dev/block/by-name;
+esp_part=$part/esp;
+linux_part=$part/linux;
+cust_part=$part/cust;
+
 ui_print "#############################################";
 ui_print "#             Linux installation            #";
 ui_print "#############################################";
 ui_print " ";
-linux_part=/dev/block/by-name/linux;
 zext="$tmp/bin/7zzs";
 mke2fs="$tmp/bin/mke2fs";
 
@@ -44,25 +50,24 @@ fi;
 blockdev --setrw "$linux_part";
 ui_print "Formatting and flashing Linux image";
 
-$mke2fs -t ext4 -F "$linux_part" || ui_print "failed to erase linux partition";
+$mke2fs -t ext4 -F "$linux_part" || abort "Failed to format linux partition";
 
-$zext e -so "$ZIPFILE" "image/linux.img" > "$linux_part" 2> "$tmp/7z.err" || abort "Failed to dump linux image";
+$zext e -so "$ZIPFILE" "image/rootfs.img" > "$linux_part" 2> "$tmp/7z.err" || abort "Failed to dump rootfs image";
 
 ui_print " ";
-ui_print "Done flashing linux!";
+ui_print "Done flashing rootfs!";
 
 ui_print "#############################################";
 ui_print "#            Boot Configuration             #";
 ui_print "#############################################";
 ui_print " ";
-esp_part=/dev/block/by-name/esp;
 mkdir -p "$tmp/esp";
 
-if mount | grep -q "/dev/block/by-name/esp"; then
+if mount | grep -q "$esp_part"; then
   ui_print "ESP partition is already mounted, forcing unmount...";
-  umount -lf "/dev/block/by-name/esp" || abort "Failed to unmount the existing ESP partition";
-fi
-mount "/dev/block/by-name/esp" "$tmp/esp" || abort "Failed to mount ESP partition";
+  umount -lf "$esp_part" || abort "Failed to unmount the ESP partition";
+fi;
+mount "$esp_part" "$tmp/esp" || abort "Failed to mount ESP partition";
 
 if ls "$tmp/esp/"[eE][fF][iI]/[mM][iI][cC][rR][oO][sS][oO][fF][tT]/Boot/SiPolicy.p7b >/dev/null 2>&1; then
   abort "Found Secure Boot config, No-SB config is required for dual-boot.";
@@ -73,8 +78,17 @@ for i in "$tmp"/esp/[eE][fF][iI]/*; do
 done;
 mkdir -p "$tmp/esp/EFI";
 unzip -o "$ZIPFILE" "efi/*" -d "$tmp/esp" || abort "Failed to extract efi";
-umount -lf "/dev/block/by-name/esp" 2>/dev/null;
+umount -lf "$esp_part" 2>/dev/null;
 
+# If there is separate boot.img need to be flashed
+unzip -o "$ZIPFILE" "image/boot.img" -d "$tmp" 2>/dev/null;
+if [ ! -f "$tmp/image/boot.img" ]; then
+  ui_print "No separate boot.img found, skipping...";
+else
+  umount -lf "$cust_part" 2>/dev/null;
+  $mke2fs -t ext4 -F "$cust_part" || abort "Failed to format cust partition";
+  dd if="$tmp/image/boot.img" of="$cust_part" || abort "Failed to flash boot.img to cust partition!";
+fi;
 ui_print " ";
 ui_print "Boot configuration setup completed!";
 
@@ -85,7 +99,7 @@ ui_print " ";
 
 # modified from the TWRP A/B Installer Backend by osm0sis, Dees_Troy and topjohnwu
 # target partition without the slot suffix
-target=/dev/block/bootdevice/by-name/boot;
+target=$boot_part;
 
 name=$(basename $target);
 
@@ -106,25 +120,25 @@ patcher="$tmp/DBKP/DualBootKernelPatcher";
 chmod 755 "$tool";
 chmod 755 "$patcher";
 
-backuppath="/sdcard/boot_backup"
-slot=$(getprop ro.boot.slot_suffix)
+backuppath="/sdcard/boot_backup";
+slot=$(getprop ro.boot.slot_suffix);
 ui_print " ";
-ui_print "Current slot: $slot."
+ui_print "Current slot: $slot.";
 
 # if [ "$slot" ]; then
   if [ "$uefipayload" ]; then
     ui_print "Running image patcher on $name$slot...";
     dd if="$target$slot" of=boot.img || abort "Failed to dump image!";
 
-    ui_print "Backing up original boot$slot.img..."
-    rm -f "$backuppath$slot.img"
-    cp -f boot.img "$backuppath$slot.img"
-    ui_print "Original boot$slot backed up to $backuppath$slot.img!"
+    ui_print "Backing up original boot$slot.img...";
+    rm -f "$backuppath$slot.img";
+    cp -f boot.img "$backuppath$slot.img";
+    ui_print "Original boot$slot backed up to $backuppath$slot.img!";
 
     $tool unpack -h boot.img || abort "Failed to unpack image!";
 
     $patcher kernel $uefipayload patchedKernel $dbkpcfg $shellcode || abort "Failed to patch the kernel";
-    mv patchedKernel kernel
+    mv patchedKernel kernel;
 
     $tool repack boot.img || abort "Failed to repack image!";
     $tool cleanup;
