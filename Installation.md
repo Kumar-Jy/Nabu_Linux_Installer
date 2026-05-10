@@ -16,7 +16,7 @@ Before you begin, make sure you have the following:
 ###  Downloads
 
 -  Modded TWRP  
-  👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/download/mod-win/TEST_V4-MODDED-TWRP-WINDOWS-17-04.img) 
+  👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/tag/mod-hybrid)
 
 -  Windows ESD Image  
   👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
