@@ -1,4 +1,4 @@
-# 📱 Triple Boot Installation Guide (Android + Windows + Linux)
+# 📱 Nabu Dual-Boot/Triple-Boot Installation Guide (Android + Windows + Linux)
 
 This guide will help you set up **Windows** and/or **Linux** alongside Android using a **modded TWRP recovery**.
 
