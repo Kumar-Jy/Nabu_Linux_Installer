@@ -116,9 +116,14 @@ jobs:
           
           find "efi/${LINUX_NAME}" -type f -iname "*.efi" | grep -q . || { echo "No .efi files found"; exit 1; }
           
+      - name: Download WinPE image
+        run: |
+          mkdir -p installer
+          wget -qO installer/pe.img https://github.com/WOAFlasher/WinInstaller/releases/download/WinPE/WinPE23H2.img
+
       - name: Create installer ZIP
         run: |
-          7z a -tzip "${{ steps.vars.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ META-INF/ > /dev/null
+          7z a -tzip "${{ steps.vars.outputs.zip_name }}" README.md bin/ DBKP/ efi/ image/ installer/ META-INF/ > /dev/null
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
@@ -129,6 +134,7 @@ jobs:
             DBKP/
             efi/
             image/
+            installer/
             META-INF/
             README.md
           if-no-files-found: error

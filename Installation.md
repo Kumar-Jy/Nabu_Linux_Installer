@@ -23,9 +23,7 @@ Before you begin, make sure you have the following:
 
 -  Win Installer ZIP - `[ Skip if Windows not required ]`  
   👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
--  SB/NSB Boot Switcher ZIP - `[ Skip if windows not required ]`  
-👉 [SB/NSB-Boot-Switcher.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/download/Files/NABU_SB_NSB_boot_switcher_V260119.zip) 
-
+ 
 - 🐧 Linux Installer ZIP  
   👉 [Nabu-Linux-Installer.zip](https://drive.google.com/drive/folders/1bupVQYnjuzJ8c6pXpyULnH1Cwska4P6-)  
 
@@ -70,20 +68,6 @@ Before you begin, make sure you have the following:
    - Finish initial setup
 3. After setup:
    - Reboot back to **Android**
-
-### Secure-Boot to No-Secure-Boot (Skip if Windows not Installed)
-1. Download required files:
-   - `SB/NSB Boot Switcher.zip`
-2. Flash Boot Switcher:  
-   *(This switches Windows to No Secure Boot, required for triple boot)*
-   - Reboot into **modded TWRP**
-   - Go to **Install**
-   - Select `SB/NSB Boot Switcher.zip`
-   - Swipe to flash
-   - Wait for installation to finish, then reboot to system
-   - Let the setup complete, It will reboot to windows
-   - Reboot back to **Android**
-</details>
 
 ---
 
