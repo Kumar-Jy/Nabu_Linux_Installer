@@ -18,8 +18,8 @@ Before you begin, make sure you have the following:
 -  Modded TWRP  
   👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/tag/mod-hybrid)
 
--  Windows ESD Image  - `[ Skip if Windows not required ]`
-  👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
+-  Windows ESD Image  - `[ Skip if Windows not required ]`    
+   👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
 
 -  Win Installer ZIP - `[ Skip if Windows not required ]`  
   👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
