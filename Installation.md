@@ -18,7 +18,7 @@ Before you begin, make sure you have the following:
 -  Modded TWRP  
   👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/tag/mod-hybrid)
 
--  Windows ESD Image  
+-  Windows ESD Image  - `[ Skip if Windows not required ]`
   👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
 
 -  Win Installer ZIP - `[ Skip if Windows not required ]`  
@@ -31,27 +31,29 @@ Before you begin, make sure you have the following:
 
 ## 📦 1. Partitioning
 <details>
-1. Boot into modded TWRP:
+  
+  1. Boot into modded TWRP: 
    ```bash
    fastboot boot modded-twrp.img
    ```
-2. In TWRP:
+  2. In TWRP:
    - Go to **Advanced → Terminal**
    - Type:
      ```bash
      partition
      ```
    - Enter the required size for:
-     - Windows
-     - Linux  
-     *(You can choose either one or both depending on your setup)*
+     - Windows (W) :
+     - Linux  (L)  :
+     *(You can choose either one or both depending on your setup and Press Enter to skip any part)*
+  
 3. Once done:
    - Reboot to **System** and setup Android
 </details>
 
 ---
 
-## 🪟 2. Windows Installation `[ Skip if Windows not required ]`  
+## 🪟 2. Windows Installation  *`[ Skip if Windows not required ]`*  
 <details>
 1. Download required files:
    - Windows `.esd` image  
@@ -68,6 +70,8 @@ Before you begin, make sure you have the following:
    - Finish initial setup
 3. After setup:
    - Reboot back to **Android**
+
+</details>
 
 ---
 
