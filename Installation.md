@@ -77,6 +77,7 @@ Before you begin, make sure you have the following:
 
 ## 🐧 3. Linux Installation
 <details>
+  
 1. Download required files:
    - `Linux-Installer.zip`
 2. Install Linux:
