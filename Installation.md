@@ -25,9 +25,7 @@ Before you begin, make sure you have the following:
   👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
  
 - 🐧 Linux Installer ZIP  
-  👉 [Pixeldrain link](https://pixeldrain.com/l/q91xunoN)
-  
-  👉 [Gdrive](https://drive.google.com/drive/folders/1bupVQYnjuzJ8c6pXpyULnH1Cwska4P6-)  
+  👉 [Linux_Installer.zip](https://pixeldrain.com/l/q91xunoN)
 
 ---
 
