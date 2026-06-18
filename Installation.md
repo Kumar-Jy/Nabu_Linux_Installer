@@ -4,50 +4,68 @@ This guide will help you set up **Windows** and/or **Linux** alongside Android u
 
 ---
 
-##  Prerequisites
+## 📋 Prerequisites
 
-Before you begin, make sure you have the following:
+Before you begin, ensure your environment meets the following requirements:
 
--  **Unlocked Bootloader**
--  At least **50% battery**
--  Backup of all important data
--  Required files:
-
-###  Downloads
-
--  Modded TWRP  
-  👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/tag/mod-hybrid)
-
--  Windows ESD Image  - `[ Skip if Windows not required ]`    
-   👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
-
--  Win Installer ZIP - `[ Skip if Windows not required ]`  
-  👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
- 
-- 🐧 Linux Installer ZIP  
-  👉 [Linux_Installer.zip](https://pixeldrain.com/l/q91xunoN)
+* **Unlocked Bootloader** (Mandatory)
+* At least **50% battery** charge
+* A host machine (PC or secondary Android device with ADB/Fastboot binaries configured)
+* A reliable USB data cable
 
 ---
 
+## 💻 ADB & Fastboot Setup
+
+If your host machine isn't configured yet, choose your platform below to set up your flashing environment:
+<details> 
+<summary>🪟 Method A: Using a Windows PC</summary>
+
+1. Download the official [Google Platform Tools for Windows](https://developer.android.com/tools/releases/platform-tools).
+2. Extract the contents of the ZIP folder to an easy-to-reach location (e.g., `C:\platform-tools`).
+3. Open **Windows Terminal** or **Command Prompt** and navigate to your folder:
+ ```cmd
+cd C:\platform-tools
+```
+4. **Driver Note:** If your phone shows up with a yellow warning triangle in Device Manager while in Fastboot mode, download and install the official
+[Google USB Drivers](https://developer.android.com/studio/run/win-usb)
+
+</details>
+
+<details>
+<summary>📱 Method B: Using Another Android Phone (OTG)</summary>
+
+You can flash your device using a secondary Android phone via a USB-OTG adapter.
+
+1. Install: **Bugjaeger Mobile ADB - USB OTG** from the Google Play Store.
+2. Connect both phones using a USB cable and Plug the OTG adapter into the host phone
+3. Launch Bugjaeger - Accept the USB permission prompt
+4. Go to Fastboot section- Open the Commands tab (terminal icon) to run ADB/Fastboot commands
+</details>
+
+
 ## 📦 1. Partitioning
 <details>
-  
-  1. Boot into modded TWRP: 
+
+  1. Download required files:
+   - 👉 [Modded-TWRP.zip](https://github.com/Kumar-Jy/twrp_device_xiaomi_nabu/releases/tag/mod-hybrid)
+     
+  2. Boot into modded TWRP: 
    ```bash
    fastboot boot modded-twrp.img
    ```
-  2. In TWRP:
+  3. In TWRP:
    - Go to **Advanced → Terminal**
    - Type:
      ```bash
      partition
      ```
-   - Enter the required size for:
+   - Enter the required size in GB for:
      - Windows (W) :
-     - Linux  (L)  :
+     - Linux  (L)  :    
      *(You can choose either one or both depending on your setup and Press Enter to skip any part)*
   
-3. Once done:
+  4. Once done:
    - Reboot to **System** and setup Android
 </details>
 
@@ -56,8 +74,10 @@ Before you begin, make sure you have the following:
 ## 🪟 2. Windows Installation  *`[ Skip if Windows not required ]`*  
 <details>
 1. Download required files:
-   - Windows `.esd` image  
-   - `WinInstaller.zip`
+
+  👉 [Windows-Image](https://arkt-7.github.io/woawin/)  
+
+  👉 [Nabu-Win-Installer.zip](https://github.com/Kumar-Jy/Windows-in-NABU-Without-PC/releases/tag/Nabu-WinInstaller)
 
    > **Make sure both files are placed in the Xiaomi Pad 5 Download folder.**
 
@@ -79,7 +99,7 @@ Before you begin, make sure you have the following:
 <details>
   
 1. Download required files:
-   - `Linux-Installer.zip`
+   - 👉 [Linux_Installer.zip](https://pixeldrain.com/l/q91xunoN)
 2. Install Linux:
    - Reboot into **modded TWRP**
    - Select `Linux-Installer.zip`
