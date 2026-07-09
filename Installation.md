@@ -99,7 +99,7 @@ You can flash your device using a secondary Android phone via a USB-OTG adapter.
 <details>
   
 1. Download required files:
-   - 👉 [Linux_Installer.zip](https://pixeldrain.com/l/q91xunoN)
+   - 👉 [Linux_Installer.zip](https://pixeldrain.com/l/FPTC8sMG)
 2. Install Linux:
    - Reboot into **modded TWRP**
    - Select `Linux-Installer.zip`
